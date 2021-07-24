@@ -1,8 +1,4 @@
 provider "vault" {
-  # Address can be set as env var VAULT_ADDR for local use, but doesn't work in the pipeline for some reason.
-  # I think it's because we're running validate and that runs in the build agent vs in the workspace.
-  # That means it would need to be set in the env for the build step.
-  # address = "http://127.0.0.1:8200"
   auth_login {
     path = "auth/approle/login"
     parameters = {
@@ -15,3 +11,35 @@ provider "vault" {
 data "vault_auth_backend" "approle" {
   path = "approle"
 }
+
+# Added by David Wilson
+
+provider "aws" {
+  region = var.region
+}
+
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+resource "aws_instance" "ubuntu" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = var.instance_type
+
+  tags = {
+    Name = var.instance_name
+  }
+}
+~    
