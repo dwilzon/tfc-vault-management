@@ -1,3 +1,4 @@
+#!/bain/bash
 export TF_VAR_approle_id=$(vault read -field=role_id auth/approle/role/local_rw/role-id)
 export TF_VAR_approle_secret_id=$(vault write -f -field=secret_id auth/approle/role/local_rw/secret-id)
 
